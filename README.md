@@ -4,7 +4,7 @@ FitGuide is an AI-powered fitness and nutrition coaching agent that uses LangCha
 
 ---
 
-## 👥 Team Members
+## Team Members
 - Tien Manh Nguyen
 - Oman Malek
 - Lufei Yu
@@ -12,7 +12,7 @@ FitGuide is an AI-powered fitness and nutrition coaching agent that uses LangCha
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Many people want to improve their fitness, lose weight, or build muscle but struggle with where to start. Online advice is often generic, overwhelming, or not personalized.
 
@@ -26,7 +26,7 @@ Target users include beginners, students, and busy individuals who want simple a
 
 ---
 
-## 🧠 Project Option
+## Project Option
 
 **Option A — Single AI Agent**
 
@@ -38,7 +38,7 @@ We built a single AI agent using LangChain that:
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 FitGuide follows this pipeline:
 
@@ -59,13 +59,13 @@ FitGuide follows this pipeline:
 
 ---
 
-## 📊 Architecture Diagram
+## Architecture Diagram
 
 ![Architecture](architecture.png)
 
 ---
 
-## 🛠️ Tools & Technologies
+## Tools & Technologies
 
 - LangChain (Agent framework)
 - Google Gemini API (LLM)
@@ -76,7 +76,7 @@ FitGuide follows this pipeline:
 
 ---
 
-## ⚙️ Installation Instructions
+## Installation Instructions
 
 ### Requirements:
 - Python 3.10+
