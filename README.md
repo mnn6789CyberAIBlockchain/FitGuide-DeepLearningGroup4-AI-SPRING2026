@@ -4,9 +4,10 @@ FitGuide is an AI-powered fitness and nutrition coaching agent that uses LangCha
 
 ## Team Members
 
-- Add Name Here
-- Add Name Here
-- Add Name Here
+- Tien Manh Nguyen
+- Oman Malek
+- Lufei Yu
+- Phillip Torres
 
 ## Problem Statement
 
