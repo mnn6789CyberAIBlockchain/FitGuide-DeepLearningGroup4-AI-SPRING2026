@@ -2,15 +2,13 @@ import os
 import pandas as pd
 import streamlit as st
 
-from langchain.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.agents import create_agent
 
 
 st.set_page_config(page_title="FitGuide AI Agent", page_icon="💪")
 
 st.title("💪 FitGuide AI Agent")
-st.write("AI fitness and nutrition coach using LangChain, tools, and memory.")
+st.write("AI fitness and nutrition coach using Gemini, tools, and memory.")
 
 
 # -----------------------------
@@ -73,7 +71,7 @@ food_db = {
 
 
 # -----------------------------
-# Helper Functions
+# Helper Functions / Tools
 # -----------------------------
 def classify_user_profile(goal, equipment, difficulty="Beginner"):
     goal_lower = goal.lower()
@@ -88,8 +86,6 @@ def classify_user_profile(goal, equipment, difficulty="Beginner"):
 
     if "dumbbell" in equipment_lower:
         equipment_class = "Dumbbell"
-    elif "bodyweight" in equipment_lower or "no equipment" in equipment_lower:
-        equipment_class = "Bodyweight"
     else:
         equipment_class = "Bodyweight"
 
@@ -101,13 +97,6 @@ def classify_user_profile(goal, equipment, difficulty="Beginner"):
 
 
 def find_exercises(goal_type, equipment, difficulty="Beginner"):
-    equipment = equipment.lower()
-
-    if "dumbbell" in equipment:
-        equipment = "Dumbbell"
-    elif "bodyweight" in equipment:
-        equipment = "Bodyweight"
-
     results = exercise_df[
         (exercise_df["goal_type"].str.contains(goal_type, case=False, na=False)) &
         (exercise_df["equipment"].str.contains(equipment, case=False, na=False)) &
@@ -116,15 +105,10 @@ def find_exercises(goal_type, equipment, difficulty="Beginner"):
 
     if results.empty:
         results = exercise_df[
-            (exercise_df["equipment"].str.contains(equipment, case=False, na=False))
+            exercise_df["equipment"].str.contains(equipment, case=False, na=False)
         ]
 
-    return results.to_dict(orient="records")
-
-
-def get_food_info(food_name):
-    food_name = food_name.lower().strip()
-    return food_db.get(food_name, {"error": "Food not found in small demo database."})
+    return results
 
 
 def estimate_macros(weight_lbs, goal):
@@ -172,98 +156,22 @@ def view_progress(user_name):
 
 
 # -----------------------------
-# LangChain Tools
-# -----------------------------
-@tool
-def lookup_exercises(goal_type: str, equipment: str, difficulty: str = "Beginner") -> str:
-    """Find exercises matching the user's goal, equipment, and difficulty."""
-    return str(find_exercises(goal_type, equipment, difficulty))
-
-
-@tool
-def nutrition_lookup(food_name: str) -> str:
-    """Look up basic nutrition information for a food item."""
-    return str(get_food_info(food_name))
-
-
-@tool
-def macro_estimator(weight_lbs: float, goal: str) -> str:
-    """Estimate calories and protein based on weight and goal."""
-    return str(estimate_macros(weight_lbs, goal))
-
-
-@tool
-def save_progress_note(user_name: str, note: str) -> str:
-    """Save a user's fitness or nutrition progress note into memory."""
-    return save_progress(user_name, note)
-
-
-@tool
-def view_progress_notes(user_name: str) -> str:
-    """Retrieve saved progress notes for a user."""
-    return str(view_progress(user_name))
-
-
-tools = [
-    lookup_exercises,
-    nutrition_lookup,
-    macro_estimator,
-    save_progress_note,
-    view_progress_notes
-]
-
-
-# -----------------------------
-# Agent Creation
+# Gemini Model
 # -----------------------------
 @st.cache_resource
-def create_fitguide_agent():
-    model = ChatGoogleGenerativeAI(
+def load_model():
+    return ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0.4
     )
 
-    return create_agent(
-        model=model,
-        tools=tools,
-        system_prompt="""
-You are FitGuide, an AI fitness and nutrition coach agent.
 
-You have tools for exercise lookup, nutrition lookup, macro estimation,
-saving progress notes, and viewing progress notes.
-
-Use tools whenever they help answer the user's request.
-
-Important behavior:
-1. If the user gives a new fitness goal, create a simple beginner-friendly plan.
-2. If the user reports progress, save it using the memory tool.
-3. If the user asks for an updated plan, check memory first.
-4. Keep advice safe and general.
-5. Do not claim to be a doctor, dietitian, or certified trainer.
-
-Always respond using this format when creating a plan:
-
-1. Goal Summary
-2. Workout Recommendation
-3. Nutrition Guidance
-4. Estimated Calories and Protein
-5. Weekly Coaching Tip
-"""
-    )
+llm = load_model()
 
 
-agent = create_fitguide_agent()
-
-
-def clean_response(response):
-    final_message = response["messages"][-1].content
-
-    if isinstance(final_message, list):
-        for item in final_message:
-            if isinstance(item, dict) and item.get("type") == "text":
-                return item.get("text")
-
-    return final_message
+def ask_fitguide(prompt):
+    response = llm.invoke(prompt)
+    return response.content
 
 
 # -----------------------------
@@ -280,27 +188,58 @@ weight = st.number_input("Weight (lbs)", min_value=80, max_value=400, value=180)
 if st.button("Generate Plan"):
     classified_profile = classify_user_profile(goal, equipment, difficulty)
 
+    exercises = find_exercises(
+        classified_profile["plan_type"],
+        classified_profile["equipment_class"],
+        difficulty
+    )
+
+    macros = estimate_macros(weight, goal)
+
     st.subheader("Deep Learning / Profile Classifier Output")
     st.json(classified_profile)
 
+    st.subheader("Exercise Tool Output")
+    st.dataframe(exercises)
+
+    st.subheader("Macro Estimator Tool Output")
+    st.json(macros)
+
     prompt = f"""
+You are FitGuide, an AI fitness and nutrition coach.
+
+Create a safe, beginner-friendly fitness and nutrition plan.
+
 User name: {name}
-User goal: {goal}
-Available equipment: {equipment}
-Difficulty level: {difficulty}
+Goal: {goal}
+Equipment: {equipment}
+Difficulty: {difficulty}
 Weight: {weight} lbs
 
-Classified user profile:
+Classifier output:
 {classified_profile}
 
-Please create a personalized fitness and nutrition plan.
-Use the tools if needed.
+Recommended exercises:
+{exercises.to_dict(orient="records")}
+
+Estimated calories and protein:
+{macros}
+
+Use this format:
+1. Goal Summary
+2. Workout Recommendation
+3. Nutrition Guidance
+4. Estimated Calories and Protein
+5. Weekly Coaching Tip
+
+Keep the response simple, friendly, and student-style.
+Do not claim to be a doctor, dietitian, or certified trainer.
 """
 
-    response = agent.invoke({"messages": [{"role": "user", "content": prompt}]})
+    response = ask_fitguide(prompt)
 
     st.subheader("FitGuide Agent Response")
-    st.write(clean_response(response))
+    st.write(response)
 
 
 st.header("Save Progress")
@@ -311,17 +250,10 @@ progress_note = st.text_area(
 )
 
 if st.button("Save Progress Note"):
-    response = agent.invoke({
-        "messages": [
-            {
-                "role": "user",
-                "content": f"My name is {name}. {progress_note}"
-            }
-        ]
-    })
+    save_message = save_progress(name, progress_note)
 
     st.subheader("Memory Tool Response")
-    st.write(clean_response(response))
+    st.success(save_message)
 
     st.subheader("Current Memory")
     st.write(st.session_state.progress_memory)
@@ -330,14 +262,51 @@ if st.button("Save Progress Note"):
 st.header("Updated Plan Using Memory")
 
 if st.button("Generate Updated Plan From Memory"):
-    response = agent.invoke({
-        "messages": [
-            {
-                "role": "user",
-                "content": f"My name is {name}. Based on my progress, give me an updated {goal} plan."
-            }
-        ]
-    })
+    memory_notes = view_progress(name)
+    classified_profile = classify_user_profile(goal, equipment, difficulty)
+
+    exercises = find_exercises(
+        classified_profile["plan_type"],
+        classified_profile["equipment_class"],
+        difficulty
+    )
+
+    macros = estimate_macros(weight, goal)
+
+    prompt = f"""
+You are FitGuide, an AI fitness and nutrition coach.
+
+The user wants an updated plan based on saved memory.
+
+User name: {name}
+Goal: {goal}
+Equipment: {equipment}
+Difficulty: {difficulty}
+Weight: {weight} lbs
+
+Saved progress memory:
+{memory_notes}
+
+Recommended exercises:
+{exercises.to_dict(orient="records")}
+
+Estimated calories and protein:
+{macros}
+
+Create an updated beginner-friendly plan.
+Mention how the saved progress affects the new recommendation.
+
+Use this format:
+1. Progress Summary
+2. Updated Workout Recommendation
+3. Updated Nutrition Guidance
+4. Estimated Calories and Protein
+5. Next Weekly Goal
+
+Keep the response simple and friendly.
+"""
+
+    response = ask_fitguide(prompt)
 
     st.subheader("Updated Agent Response")
-    st.write(clean_response(response))
+    st.write(response)
