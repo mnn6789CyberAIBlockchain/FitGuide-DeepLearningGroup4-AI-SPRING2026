@@ -1,10 +1,10 @@
-# 💪 FitGuide: AI Fitness & Nutrition Coach
+#  FitGuide: AI Fitness & Nutrition Coach
 
 FitGuide is an AI-powered fitness and nutrition coaching application that provides personalized workout and nutrition plans using a combination of LLM reasoning, structured tools, and memory. The project evolved from a notebook-based agent into a full interactive web application using Streamlit.
 
 ---
 
-## 👥 Team Members
+##  Team Members
 
 * Tien Manh Nguyen
 * Oman Malek
@@ -13,7 +13,7 @@ FitGuide is an AI-powered fitness and nutrition coaching application that provid
 
 ---
 
-## 🎯 Problem Statement
+##  Problem Statement
 
 Many people want to improve their fitness, lose weight, or build muscle but struggle with where to start. Most online resources are:
 
@@ -32,7 +32,7 @@ Target users include beginners, students, and busy individuals.
 
 ---
 
-## 🧠 Project Type
+##  Project Type
 
 **Option A — Single AI Agent**
 
@@ -44,7 +44,7 @@ Originally built in a notebook, the project was expanded into a full **Streamlit
 
 ---
 
-## 🏗️ Final Architecture
+##  Final Architecture
 
 **User Input → Profile Classifier → Tools → LLM (Gemini) → Memory → Output UI**
 
