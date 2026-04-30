@@ -2,28 +2,81 @@
 
 ## What Worked Well
 
-The main FitGuide agent worked well after we connected the core pieces together. The agent can accept a user fitness goal, classify the user profile, call tools, and generate a personalized fitness and nutrition plan. The tool-calling process was one of the strongest parts of the project because it showed that the system was not just giving a direct chatbot response. It used separate tools for exercise lookup, nutrition lookup, calorie/protein estimation, and memory.
+The overall system worked very well after we converted the original notebook agent into a Streamlit application. The agent is able to take user inputs such as goal, equipment, difficulty, and nutrition style, and generate a structured fitness and nutrition plan.
 
-The memory feature also worked well. The agent was able to save a user progress note and later use that saved progress to create an updated plan. This helped make the project feel more like a real AI agent because it could remember user information and adapt future recommendations.
+One of the strongest parts of the project is the tool-based design. Instead of acting like a simple chatbot, the system uses separate tools for:
+
+* Exercise selection
+* Macro estimation
+* Nutrition guidance
+* Memory handling
+
+This made the system feel more like a real AI agent.
+
+The addition of the sidebar Q&A chatbot also worked well. It provides a quick and simple way for users to ask questions without generating a full plan.
+
+---
 
 ## What Did Not Work and How We Handled It
 
-One issue we ran into was that the exercise lookup tool originally returned an empty result when the agent passed the word “dumbbells” instead of “Dumbbell.” We fixed this by making the exercise search function more flexible so it could handle different versions of the same equipment name.
+One issue we faced was input inconsistency, especially with equipment names like “dumbbells” vs “Dumbbell.” This caused empty results in the exercise tool. We solved this by adding mapping logic and making the filtering more flexible.
 
-Another limitation is that the nutrition database and exercise dataset are small. To keep the project realistic and finishable within the semester timeline, we used a small custom dataset instead of trying to connect a large external API. This made the project easier to test, explain, and demonstrate.
+Another limitation is the dataset size. The exercise and nutrition data are manually created and relatively small. We accepted this trade-off to keep the system simple, stable, and easy to demonstrate.
+
+---
 
 ## Biggest Technical Challenge
 
-The biggest technical challenge was making the system behave like an actual agent instead of a simple chatbot. The final requirements asked for tools, a reasoning pattern, and memory or retrieval. We solved this by using LangChain with Gemini and defining multiple tools that the agent could call during execution.
+The biggest challenge was transitioning from a notebook-based agent to a real application.
 
-We also added memory tools so the agent could save and retrieve user progress. This helped satisfy the memory requirement and made the output more personalized.
+In the notebook, the agent worked step-by-step, but converting it into a live interactive app required:
+
+* Managing UI inputs
+* Handling session state (memory)
+* Structuring prompts dynamically
+* Ensuring tools still work correctly
+
+We also had to debug environment issues and API integration while making sure the app remained responsive.
+
+---
 
 ## Change From Midterm Blueprint
 
-We stayed with the same project idea from the midterm blueprint: FitGuide, an AI fitness and nutrition coach agent. We also stayed with Option A, which is a single AI agent. The main improvement from the midterm plan was adding working memory so the agent could remember user progress and update future recommendations.
+We kept the same core idea (FitGuide AI agent), but significantly expanded the implementation.
+
+Main changes:
+
+* Converted from notebook → Streamlit app
+* Added multiple difficulty levels
+* Added more equipment types
+* Added multiple nutrition styles
+* Added sidebar chatbot
+* Improved filtering and logic
+
+These changes made the project much more complete and practical.
+
+---
 
 ## What We Would Build Next
 
-If we had another semester, we would expand the exercise and nutrition datasets and connect the system to a real nutrition API such as USDA FoodData Central. We would also add persistent memory using a database so the user’s progress could be saved between sessions.
+If we had more time, we would:
 
-Another improvement would be creating a simple web interface using Streamlit so users could interact with the agent more easily. In a future version, we could also add image-based features, such as food photo recognition or exercise form analysis, using computer vision models.
+* Add persistent memory using a database
+* Expand exercise and nutrition datasets
+* Integrate external APIs (USDA nutrition data)
+* Improve UI design for mobile users
+* Add user authentication and profiles
+
+We would also consider adding advanced features such as:
+
+* AI-based meal tracking
+* Image recognition for food
+* Workout form analysis
+
+---
+
+## Final Thoughts
+
+This project helped us understand how to move from a theoretical AI agent to a real-world application. The combination of tools, memory, LLM reasoning, and UI design showed how AI systems can be made practical and user-friendly.
+
+The final result is a functional AI fitness assistant that demonstrates both technical understanding and real-world usability.
