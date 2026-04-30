@@ -155,6 +155,16 @@ streamlit run app.py
 http://localhost:8501
 ```
 
+## 🎥 Demo Video
+
+Watch the demo here:
+
+https://drive.google.com/file/d/1YRggDnCHGKB8tFJ76K8z_n3RDgRI1jEF/view?usp=sharing
+
+This demo shows:
+1. Generating a new plan
+2. Saving progress to memory
+3. Updating plan using memory
 ---
 
 ## 💬 Features
